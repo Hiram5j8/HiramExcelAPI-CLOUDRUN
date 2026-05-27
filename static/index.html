@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Upload XLS</title>
+
+  <style>
+
+    body{
+      font-family: Arial;
+      padding:30px;
+    }
+
+    .captcha-box{
+      margin-top:20px;
+      margin-bottom:20px;
+    }
+
+    .captcha-number{
+      display:inline-block;
+      background:#eee;
+      padding:10px 20px;
+      font-size:28px;
+      font-weight:bold;
+      color:blue;
+      letter-spacing:5px;
+    }
+
+    .captcha-input{
+      margin-top:10px;
+      padding:8px;
+      width:200px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h2>
+    Integrate EXCEL (*.xlsx and *.zip w/ xlsx files)
+  </h2>
+
+  <!-- VERSION -->
+  <div id="version"
+       style="
+         font-size:18px;
+         font-weight:bold;
+         color:blue;
+         margin-bottom:20px;
+       ">
+    VERSION LOADING...
+  </div>
+
+  <!-- FORM -->
+  <form id="form">
+
+    <!-- BASE XLS -->
+    <div>
+      Base xlsx
+    </div>
+
+    <input
+      type="file"
+      name="base_xls"
+      accept=".xls,.xlsx">
+
+    <br><br>
+
+    <!-- ZIP -->
+    <div>
+      ZIP w/ xlsx files
+    </div>
+
+    <input
+      type="file"
+      name="data_zip"
+      accept=".zip">
+
+    <br><br>
+
+    <!-- CAPTCHA -->
+    <div class="captcha-box">
+
+      <div>
+        Please enter verification code:
+      </div>
+
+      <br>
+
+      <!-- 後端驗證碼 -->
+      <div
+        class="captcha-number"
+        id="captchaText">
+        0000
+      </div>
+
+      <br><br>
+
+      <!-- 使用者輸入 -->
+      <input
+        type="text"
+        id="captchaInput"
+        class="captcha-input"
+        placeholder="Enter captcha">
+
+    </div>
+
+    <br>
+
+    <!-- BUTTON -->
+    <button type="submit">
+      Combined output xlsx file
+    </button>
+
+  </form>
+
+  <br>
+
+  <!-- RESULT -->
+  <pre id="result"></pre>
+
+  <!-- ========================= -->
+  <!-- VERSION SCRIPT -->
+  <!-- ========================= -->
+  <script>
+
+    async function loadVersion() {
+
+      try {
+
+        const res = await fetch("/version");
+
+        const data = await res.json();
+
+        document.getElementById("version").innerText =
+          "VERSION : " + data.version;
+
+      } catch (err) {
+
+        document.getElementById("version").innerText =
+          "VERSION LOAD ERROR";
+
+      }
+
+    }
+
+    loadVersion();
+
+  </script>
+
+  <!-- ========================= -->
+  <!-- CAPTCHA SCRIPT -->
+  <!-- ========================= -->
+  <script>
+
+    async function loadCaptcha() {
+
+      try {
+
+        const res = await fetch("/captcha");
+
+        const data = await res.json();
+
+        document.getElementById("captchaText").innerText =
+          data.captcha;
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    // 初始載入
+    loadCaptcha();
+
+  </script>
+
+  <!-- ========================= -->
+  <!-- UPLOAD SCRIPT -->
+  <!-- ========================= -->
+  <script>
+
+    const form = document.getElementById("form");
+
+    form.onsubmit = async (e) => {
+
+      e.preventDefault();
+
+      document.getElementById("result").textContent =
+        "Processing...";
+
+      try {
+
+        // 建立 FormData
+        const formData = new FormData(form);
+
+        // CAPTCHA
+        formData.append(
+          "captcha",
+          document.getElementById("captchaInput").value
+        );
+
+        // POST
+        const res = await fetch("/process", {
+          method: "POST",
+          body: formData
+        });
+
+        // =========================
+        // CAPTCHA FAIL
+        // =========================
+        if (!res.ok) {
+
+          const txt = await res.text();
+
+          document.getElementById("result").textContent =
+            txt;
+
+          // 清空輸入框
+          document.getElementById("captchaInput").value = "";
+
+          // 刷新驗證碼
+          loadCaptcha();
+
+          return;
+        }
+
+        // =========================
+        // DOWNLOAD XLSX
+        // =========================
+        const blob = await res.blob();
+
+        const url =
+          window.URL.createObjectURL(blob);
+
+        const a =
+          document.createElement("a");
+
+        a.href = url;
+
+        a.download = "result.xlsx";
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+        window.URL.revokeObjectURL(url);
+
+        // 顯示成功
+        document.getElementById("result").textContent =
+          "Downloaded";
+
+        // 清空輸入框
+        document.getElementById("captchaInput").value = "";
+
+        // 刷新新 CAPTCHA
+        loadCaptcha();
+
+      } catch (err) {
+
+        console.error(err);
+
+        document.getElementById("result").textContent =
+          "ERROR";
+
+        // 清空輸入框
+        document.getElementById("captchaInput").value = "";
+
+        // 刷新 CAPTCHA
+        loadCaptcha();
+
+      }
+
+    };
+
+  </script>
+
+</body>
+
+</html>
