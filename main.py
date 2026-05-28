@@ -1,3 +1,7 @@
+from fastapi import FastAPI
 
+app = FastAPI()
 
-print("test")
+@app.get("/")
+def home():
+    return {"message": "Hello Git + FastAPI OK"}
