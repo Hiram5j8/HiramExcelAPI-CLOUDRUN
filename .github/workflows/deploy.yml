@@ -6,7 +6,7 @@ on:
 
 env:
   SERVICE_NAME: fastapi-service
-  PROJECT_ID: HiramExcelAPI-CLOUDRUN   # �� �����g��
+  PROJECT_ID: excelcloud-260527   # �� �����g��
   REGION: asia-east1                 # �� �����g��
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
