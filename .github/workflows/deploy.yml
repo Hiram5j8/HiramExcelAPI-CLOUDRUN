@@ -6,8 +6,8 @@ on:
 
 env:
   SERVICE_NAME: fastapi-service
-  PROJECT_ID: no-my-project-260517   # ¡ö ª½±µ¼g¦º
-  REGION: asia-east1                 # ¡ö ª½±µ¼g¦º
+  PROJECT_ID: HiramExcelAPI-CLOUDRUN   # ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½
+  REGION: asia-east1                 # ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½gï¿½ï¿½
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
